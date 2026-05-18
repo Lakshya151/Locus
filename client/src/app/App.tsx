@@ -14,6 +14,7 @@ import {
   get_posts_25km,
   get_posts_by_city,
   get_posts_by_country,
+  get_all_posts,
 } from "../lib/supabase";
 
 const mockNews = [
@@ -158,6 +159,8 @@ export default function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [news, setNews] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [userCity, setUserCity] = useState("");
+  const [userCountry, setUserCountry] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -181,6 +184,29 @@ export default function App() {
           async (position) => {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
+            try {
+              const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+              );
+
+              const locationData = await response.json();
+
+              const city =
+                locationData.address.city ||
+                locationData.address.town ||
+                locationData.address.village ||
+                "";
+
+              const country = locationData.address.country || "";
+
+              setUserCity(city);
+              setUserCountry(country);
+
+              console.log("Detected city:", city);
+              console.log("Detected country:", country);
+            } catch (err) {
+              console.error("Location fetch failed", err);
+            }
 
             let data = [];
 
@@ -198,11 +224,21 @@ export default function App() {
                 break;
 
               case "city":
-                data = await get_posts_by_city("Greater Noida");
+                if (userCity) {
+                  data = await get_posts_by_city(userCity);
+                }
                 break;
 
               case "country":
-                data = await get_posts_by_country("India");
+                if (userCountry) {
+                  data = await get_posts_by_country(userCountry);
+                }
+                break;
+
+              case "world":
+                if (userCountry) {
+                  data = await get_all_posts();
+                }
                 break;
 
               default:
