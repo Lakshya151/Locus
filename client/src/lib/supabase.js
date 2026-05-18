@@ -76,28 +76,43 @@ export async function get_posts_by_country(country_name) {
   return data;
 }
 
-async function test_functions() {
-  console.log("===== TOKYO 5KM =====");
-  const posts5km = await get_posts_5km(35.6762, 139.6503);
-  console.log(posts5km);
+export async function get_all_posts() {
+  const { data, error } = await supabase.rpc("get_all_posts");
 
-  console.log("===== TOKYO 10KM =====");
-  const posts10km = await get_posts_10km(35.6762, 139.6503);
-  console.log(posts10km);
+  if (error) {
+    console.error(error);
+    return null;
+  }
 
-  console.log("===== TOKYO 25KM =====");
-  const posts25km = await get_posts_25km(35.6762, 139.6503);
-  console.log(posts25km);
-
-  console.log("===== CITY: TOKYO =====");
-  const cityPosts = await get_posts_by_city("Tokyo");
-  console.log(cityPosts);
-
-  console.log("===== COUNTRY: JAPAN =====");
-  const countryPosts = await get_posts_by_country("Japan");
-  console.log(countryPosts);
+  return data;
 }
 
-console.log("===== TOKYO 5KM =====");
-const posts5km = await get_posts_5km(35.6762, 139.6503);
-console.log(posts5km);
+async function test_functions() {
+  // Galgotias University coordinates
+  const lat = 28.367;
+  const lng = 77.54;
+
+  console.log("===== GALGOTIAS 5KM =====");
+  const posts5km = await get_posts_5km(lat, lng);
+  console.log(posts5km);
+
+  console.log("===== GALGOTIAS 10KM =====");
+  const posts10km = await get_posts_10km(lat, lng);
+  console.log(posts10km);
+
+  console.log("===== GALGOTIAS 25KM =====");
+  const posts25km = await get_posts_25km(lat, lng);
+  console.log(posts25km);
+
+  console.log("===== CITY: GREATER NOIDA =====");
+  const cityPosts = await get_posts_by_city("Greater Noida");
+  console.log(cityPosts);
+
+  console.log("===== COUNTRY: INDIA =====");
+  const countryPosts = await get_posts_by_country("India");
+  console.log(countryPosts);
+
+  console.log("===== ALL POSTS =====");
+  const allPosts = await get_all_posts();
+  console.log(allPosts);
+}
