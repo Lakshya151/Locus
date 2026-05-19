@@ -5,9 +5,10 @@ interface NavbarProps {
   onOpenNotifications: () => void;
   onOpenSearch: () => void;
   onOpenLocation: () => void;
+  hasUnreadNotifications: boolean;
 }
 
-export default function Navbar({ onOpenNotifications, onOpenSearch, onOpenLocation }: NavbarProps) {
+export default function Navbar({ onOpenNotifications, onOpenSearch, onOpenLocation, hasUnreadNotifications }: NavbarProps) {
   return (
     <motion.nav
       initial={{ y: -100 }}
@@ -57,7 +58,9 @@ export default function Navbar({ onOpenNotifications, onOpenSearch, onOpenLocati
             className="relative p-2 hover:bg-[#161616] rounded-xl transition-colors"
           >
             <Bell className="w-5 h-5 text-gray-300" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-[#FF5A1F] rounded-full"></span>
+            {hasUnreadNotifications && (
+              <span className="absolute top-1 right-1 w-2 h-2 bg-[#FF5A1F] rounded-full"></span>
+            )}
           </motion.button>
 
           <div className="w-8 h-8 bg-gradient-to-br from-[#FF5A1F] to-[#FF7A3F] rounded-full flex items-center justify-center cursor-pointer">

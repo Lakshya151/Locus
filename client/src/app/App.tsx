@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
+import { X } from "lucide-react";
 import Navbar from "./components/Navbar";
 import CategoryTabs from "./components/CategoryTabs";
 import NewsCard from "./components/NewsCard";
-import TrendingSidebar from "./components/TrendingSidebar";
 import BottomNavigation from "./components/BottomNavigation";
 import CreatePostModal from "./components/CreatePostModal";
 import LocationSelector from "./components/LocationSelector";
@@ -30,6 +30,76 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [userCity, setUserCity] = useState("");
   const [userCountry, setUserCountry] = useState("");
+
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true);
+  const [notifications, setNotifications] = useState([
+    {
+      id: "1",
+      title: "New post in your area",
+      message: "Someone posted about traffic near Mission District",
+      time: "1 hour ago",
+    },
+    {
+      id: "2",
+      title: "New post in your area",
+      message: "Someone posted about traffic near Mission District",
+      time: "2 hours ago",
+    },
+    {
+      id: "3",
+      title: "New post in your area",
+      message: "Someone posted about traffic near Mission District",
+      time: "3 hours ago",
+    },
+    {
+      id: "4",
+      title: "New post in your area",
+      message: "Someone posted about traffic near Mission District",
+      time: "4 hours ago",
+    },
+    {
+      id: "5",
+      title: "New post in your area",
+      message: "Someone posted about traffic near Mission District",
+      time: "5 hours ago",
+    },
+  ]);
+
+  const removeNotification = (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const handleToggleNotifications = () => {
+    const nextState = !isNotificationsOpen;
+    setIsNotificationsOpen(nextState);
+    if (nextState) {
+      setHasUnreadNotifications(false);
+      setIsSearchOpen(false);
+    }
+  };
+
+  const handleToggleSearch = () => {
+    const nextState = !isSearchOpen;
+    setIsSearchOpen(nextState);
+    if (nextState) {
+      setIsNotificationsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const newNotif = {
+        id: Date.now().toString(),
+        title: "New update in Hayes Valley",
+        message: "A new community clean-up drive has been scheduled for golden gate park.",
+        time: "Just now",
+      };
+      setNotifications((prev) => [newNotif, ...prev]);
+      setHasUnreadNotifications(true);
+    }, 20000); // 20 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -170,9 +240,10 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#0B0B0B] dark p-1">
       <Navbar
-        onOpenNotifications={() => setIsNotificationsOpen(!isNotificationsOpen)}
-        onOpenSearch={() => setIsSearchOpen(!isSearchOpen)}
+        onOpenNotifications={handleToggleNotifications}
+        onOpenSearch={handleToggleSearch}
         onOpenLocation={() => setIsLocationModalOpen(true)}
+        hasUnreadNotifications={hasUnreadNotifications}
       />
 
       <CategoryTabs
@@ -180,57 +251,51 @@ export default function App() {
         onCategoryChange={setActiveCategory}
       />
 
-      <div className="max-w-7xl mx-auto px-4 pt-6 pb-24 lg:pb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            {activeTab === "map" ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <MapView />
-              </motion.div>
-            ) : (
-              <>
-                {filteredNews.map((item, index) => (
+      <div className="max-w-3xl mx-auto px-4 pt-6 pb-24 lg:pb-6">
+        <div className="space-y-6">
+          {activeTab === "map" ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <MapView />
+            </motion.div>
+          ) : (
+            <>
+              {filteredNews.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <NewsCard {...item} />
+                </motion.div>
+              ))}
+
+              {isLoading && (
+                <div className="flex justify-center py-8">
                   <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <NewsCard {...item} />
-                  </motion.div>
-                ))}
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 1,
+                      ease: "linear",
+                    }}
+                    className="w-8 h-8 border-2 border-[#FF5A1F] border-t-transparent rounded-full"
+                  />
+                </div>
+              )}
 
-                {isLoading && (
-                  <div className="flex justify-center py-8">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        repeat: Infinity,
-                        duration: 1,
-                        ease: "linear",
-                      }}
-                      className="w-8 h-8 border-2 border-[#FF5A1F] border-t-transparent rounded-full"
-                    />
-                  </div>
-                )}
-
-                {filteredNews.length === 0 && (
-                  <div className="text-center py-12">
-                    <p className="text-gray-500">
-                      No news in this category yet.
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          <div className="hidden lg:block">
-            <TrendingSidebar />
-          </div>
+              {filteredNews.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">
+                    No news in this category yet.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 
@@ -251,49 +316,89 @@ export default function App() {
       />
 
       {isNotificationsOpen && (
-        <motion.div
-          initial={{ opacity: 0, x: 300 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 300 }}
-          className="fixed right-0 top-16 bottom-0 w-full md:w-96 bg-[#161616] border-l border-[#2A2A2A] z-40 overflow-y-auto"
-        >
-          <div className="p-4">
-            <h2 className="text-white text-xl font-bold mb-4">Notifications</h2>
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className="p-3 bg-[#1F1F1F] rounded-xl border border-[#2A2A2A]"
+        <>
+          <div
+            className="fixed inset-0 bg-[#000000]/40 backdrop-blur-xs z-30"
+            onClick={() => setIsNotificationsOpen(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, x: 300 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 300 }}
+            className="fixed right-0 top-16 bottom-0 w-full md:w-96 bg-[#161616] border-l border-[#2A2A2A] z-40 overflow-y-auto shadow-2xl"
+          >
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-white text-xl font-bold">Notifications</h2>
+                <button
+                  onClick={() => setIsNotificationsOpen(false)}
+                  className="p-1 text-gray-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
                 >
-                  <p className="text-white text-sm font-semibold mb-1">
-                    New post in your area
-                  </p>
-                  <p className="text-gray-400 text-xs">
-                    Someone posted about traffic near Mission District
-                  </p>
-                  <p className="text-gray-500 text-xs mt-2">{i} hour ago</p>
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {notifications.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  No notifications yet.
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-3">
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className="relative p-3 bg-[#1F1F1F] rounded-xl border border-[#2A2A2A]"
+                    >
+                      <button
+                        onClick={() => removeNotification(notification.id)}
+                        className="absolute top-3 right-3 p-1 text-gray-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+                        title="Remove notification"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                      <p className="text-white text-sm font-semibold pr-6 mb-1">
+                        {notification.title}
+                      </p>
+                      <p className="text-gray-400 text-xs pr-4">
+                        {notification.message}
+                      </p>
+                      <p className="text-gray-500 text-xs mt-2">{notification.time}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </>
       )}
 
       {isSearchOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="fixed top-16 left-0 right-0 z-40 bg-[#161616] border-b border-[#2A2A2A] p-4"
-        >
-          <div className="max-w-3xl mx-auto">
-            <input
-              type="text"
-              placeholder="Search local news..."
-              autoFocus
-              className="w-full bg-[#1F1F1F] text-white placeholder-gray-500 px-4 py-3 rounded-xl border border-[#2A2A2A] focus:border-[#FF5A1F] focus:outline-none"
-            />
-          </div>
-        </motion.div>
+        <>
+          <div
+            className="fixed inset-0 bg-[#000000]/40 backdrop-blur-xs z-30"
+            onClick={() => setIsSearchOpen(false)}
+          />
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="fixed top-16 left-0 right-0 z-40 bg-[#161616] border-b border-[#2A2A2A] p-4 shadow-2xl"
+          >
+            <div className="max-w-3xl mx-auto flex items-center gap-3">
+              <input
+                type="text"
+                placeholder="Search local news..."
+                autoFocus
+                className="w-full bg-[#1F1F1F] text-white placeholder-gray-500 px-4 py-3 rounded-xl border border-[#2A2A2A] focus:border-[#FF5A1F] focus:outline-none"
+              />
+              <button
+                onClick={() => setIsSearchOpen(false)}
+                className="p-3 bg-[#1F1F1F] text-gray-400 hover:text-white rounded-xl border border-[#2A2A2A] transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+        </>
       )}
     </div>
   );
