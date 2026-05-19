@@ -112,7 +112,7 @@ export default function NewsCard({
         </div>
 
         <h2 className="text-white text-lg font-bold mb-2 leading-snug">{headline}</h2>
-        <p className="text-gray-400 text-sm mb-3 line-clamp-2">{description}</p>
+        
 
         {image && (
           <div className="mb-3 rounded-xl overflow-hidden">
@@ -123,6 +123,7 @@ export default function NewsCard({
             />
           </div>
         )}
+        <p className="text-gray-400 text-sm mb-3 line-clamp-2">{description}</p>
 
         <div className="flex items-center justify-between pt-3 border-t border-[#2A2A2A]">
           <div className="flex items-center gap-1">
